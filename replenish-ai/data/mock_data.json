@@ -1,0 +1,144 @@
+{
+  "products": [
+    {
+      "sku": "SKU-101",
+      "name": "HyperDrive Pro SSD 1TB NVMe",
+      "category": "Storage",
+      "available_stock": 15,
+      "unit_cost": 18.0,
+      "reorder_point": 50,
+      "warehouse_location": "WH-A1-Bay04"
+    },
+    {
+      "sku": "SKU-102",
+      "name": "ErgoMech RGB Mechanical Keyboard",
+      "category": "Peripherals",
+      "available_stock": 80,
+      "unit_cost": 45.0,
+      "reorder_point": 90,
+      "warehouse_location": "WH-B2-Bay11"
+    },
+    {
+      "sku": "SKU-103",
+      "name": "UltraGlide Wireless Optical Mouse",
+      "category": "Peripherals",
+      "available_stock": 250,
+      "unit_cost": 12.0,
+      "reorder_point": 60,
+      "warehouse_location": "WH-B3-Bay02"
+    },
+    {
+      "sku": "SKU-104",
+      "name": "ThunderBolt 4 Multi-Port Docking Station",
+      "category": "Accessories",
+      "available_stock": 0,
+      "unit_cost": 65.0,
+      "reorder_point": 30,
+      "warehouse_location": "WH-C1-Bay09"
+    }
+  ],
+  "suppliers": [
+    {
+      "supplier_id": "SUP-APEX",
+      "supplier_name": "Apex Logistics (Standard)",
+      "sku": "SKU-101",
+      "strategy_type": "Alpha",
+      "lead_time_days": 5,
+      "unit_price": 18.00,
+      "shipping_cost": 120.00,
+      "moq": 50,
+      "reliability_score": 94.5,
+      "contact_email": "orders@apexlogistics.com"
+    },
+    {
+      "supplier_id": "SUP-VELOCITY",
+      "supplier_name": "Velocity Freight (Expedited)",
+      "sku": "SKU-101",
+      "strategy_type": "Beta",
+      "lead_time_days": 2,
+      "unit_price": 24.50,
+      "shipping_cost": 280.00,
+      "moq": 25,
+      "reliability_score": 98.8,
+      "contact_email": "rush@velocityfreight.com"
+    },
+    {
+      "supplier_id": "SUP-KEYTRON",
+      "supplier_name": "Global Keytronics (Standard)",
+      "sku": "SKU-102",
+      "strategy_type": "Alpha",
+      "lead_time_days": 5,
+      "unit_price": 42.00,
+      "shipping_cost": 150.00,
+      "moq": 40,
+      "reliability_score": 92.0,
+      "contact_email": "supply@keytronics.com"
+    },
+    {
+      "supplier_id": "SUP-SWIFT",
+      "supplier_name": "SwiftDeliver Priority (Expedited)",
+      "sku": "SKU-102",
+      "strategy_type": "Beta",
+      "lead_time_days": 2,
+      "unit_price": 52.00,
+      "shipping_cost": 310.00,
+      "moq": 20,
+      "reliability_score": 97.5,
+      "contact_email": "dispatch@swiftdeliver.com"
+    },
+    {
+      "supplier_id": "SUP-PRIMEPARTS",
+      "supplier_name": "PrimeParts Distro (Standard)",
+      "sku": "SKU-103",
+      "strategy_type": "Alpha",
+      "lead_time_days": 4,
+      "unit_price": 11.50,
+      "shipping_cost": 80.00,
+      "moq": 100,
+      "reliability_score": 96.0,
+      "contact_email": "orders@primeparts.com"
+    },
+    {
+      "supplier_id": "SUP-RAPIDLOG",
+      "supplier_name": "RapidLogistics Express (Expedited)",
+      "sku": "SKU-103",
+      "strategy_type": "Beta",
+      "lead_time_days": 2,
+      "unit_price": 15.00,
+      "shipping_cost": 180.00,
+      "moq": 50,
+      "reliability_score": 99.0,
+      "contact_email": "air@rapidlogistics.com"
+    },
+    {
+      "supplier_id": "SUP-DOCKTECH",
+      "supplier_name": "DockTech Manufacturing (Standard)",
+      "sku": "SKU-104",
+      "strategy_type": "Alpha",
+      "lead_time_days": 7,
+      "unit_price": 60.00,
+      "shipping_cost": 200.00,
+      "moq": 20,
+      "reliability_score": 91.0,
+      "contact_email": "sales@docktech.com"
+    },
+    {
+      "supplier_id": "SUP-AEROFREIGHT",
+      "supplier_name": "AeroFreight Priority (Expedited)",
+      "sku": "SKU-104",
+      "strategy_type": "Beta",
+      "lead_time_days": 3,
+      "unit_price": 78.00,
+      "shipping_cost": 420.00,
+      "moq": 10,
+      "reliability_score": 99.5,
+      "contact_email": "ops@aerofreight.com"
+    }
+  ],
+  "daily_sales_logs": [
+    {"sku": "SKU-101", "history": [10, 11, 9, 10, 12, 8, 10, 11, 9, 10, 10, 12, 8, 10, 11, 9, 10, 12, 8, 10, 11, 9, 10, 10, 12, 8, 10, 11, 9, 10]},
+    {"sku": "SKU-102", "history": [12, 10, 8, 11, 9, 10, 10, 12, 9, 8, 11, 10, 9, 10, 12, 8, 11, 10, 9, 10, 11, 8, 12, 10, 9, 10, 11, 8, 12, 10]},
+    {"sku": "SKU-103", "history": [8, 9, 7, 8, 8, 9, 7, 8, 8, 9, 7, 8, 8, 9, 7, 8, 8, 9, 7, 8, 8, 9, 7, 8, 8, 9, 7, 8, 8, 9]},
+    {"sku": "SKU-104", "history": [5, 4, 6, 5, 5, 4, 6, 5, 5, 4, 6, 5, 5, 4, 6, 5, 5, 4, 6, 5, 5, 4, 6, 5, 5, 4, 6, 5, 5, 4]}
+  ]
+}
