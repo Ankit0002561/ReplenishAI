@@ -2,8 +2,8 @@
   "products": [
     {
       "sku": "SKU-101",
-      "name": "HyperDrive Pro SSD 1TB NVMe",
-      "category": "Storage",
+      "name": "Industrial Widget A",
+      "category": "Industrial Hardware",
       "available_stock": 15,
       "unit_cost": 18.0,
       "reorder_point": 50,
@@ -11,29 +11,29 @@
     },
     {
       "sku": "SKU-102",
-      "name": "ErgoMech RGB Mechanical Keyboard",
-      "category": "Peripherals",
-      "available_stock": 80,
-      "unit_cost": 45.0,
-      "reorder_point": 90,
+      "name": "Precision Valve B",
+      "category": "Flow Control",
+      "available_stock": 65,
+      "unit_cost": 42.0,
+      "reorder_point": 80,
       "warehouse_location": "WH-B2-Bay11"
     },
     {
       "sku": "SKU-103",
-      "name": "UltraGlide Wireless Optical Mouse",
-      "category": "Peripherals",
-      "available_stock": 250,
-      "unit_cost": 12.0,
-      "reorder_point": 60,
+      "name": "Hydraulic Seal C",
+      "category": "Sealing & Gaskets",
+      "available_stock": 320,
+      "unit_cost": 8.5,
+      "reorder_point": 50,
       "warehouse_location": "WH-B3-Bay02"
     },
     {
       "sku": "SKU-104",
-      "name": "ThunderBolt 4 Multi-Port Docking Station",
-      "category": "Accessories",
-      "available_stock": 0,
-      "unit_cost": 65.0,
-      "reorder_point": 30,
+      "name": "Sensory Circuit D",
+      "category": "Electronics & Sensors",
+      "available_stock": 22,
+      "unit_cost": 55.0,
+      "reorder_point": 60,
       "warehouse_location": "WH-C1-Bay09"
     }
   ],
@@ -64,7 +64,7 @@
     },
     {
       "supplier_id": "SUP-KEYTRON",
-      "supplier_name": "Global Keytronics (Standard)",
+      "supplier_name": "Precision Valve Distro (Standard)",
       "sku": "SKU-102",
       "strategy_type": "Alpha",
       "lead_time_days": 5,
@@ -72,7 +72,7 @@
       "shipping_cost": 150.00,
       "moq": 40,
       "reliability_score": 92.0,
-      "contact_email": "supply@keytronics.com"
+      "contact_email": "supply@valvedistro.com"
     },
     {
       "supplier_id": "SUP-SWIFT",
@@ -88,57 +88,69 @@
     },
     {
       "supplier_id": "SUP-PRIMEPARTS",
-      "supplier_name": "PrimeParts Distro (Standard)",
+      "supplier_name": "PrimeSeals Direct (Standard)",
       "sku": "SKU-103",
       "strategy_type": "Alpha",
-      "lead_time_days": 4,
-      "unit_price": 11.50,
-      "shipping_cost": 80.00,
+      "lead_time_days": 3,
+      "unit_price": 8.50,
+      "shipping_cost": 75.00,
       "moq": 100,
       "reliability_score": 96.0,
-      "contact_email": "orders@primeparts.com"
+      "contact_email": "orders@primeseals.com"
     },
     {
       "supplier_id": "SUP-RAPIDLOG",
       "supplier_name": "RapidLogistics Express (Expedited)",
       "sku": "SKU-103",
       "strategy_type": "Beta",
-      "lead_time_days": 2,
-      "unit_price": 15.00,
-      "shipping_cost": 180.00,
+      "lead_time_days": 1,
+      "unit_price": 12.00,
+      "shipping_cost": 160.00,
       "moq": 50,
       "reliability_score": 99.0,
       "contact_email": "air@rapidlogistics.com"
     },
     {
       "supplier_id": "SUP-DOCKTECH",
-      "supplier_name": "DockTech Manufacturing (Standard)",
+      "supplier_name": "SensorTech Distro (Standard)",
       "sku": "SKU-104",
       "strategy_type": "Alpha",
-      "lead_time_days": 7,
-      "unit_price": 60.00,
-      "shipping_cost": 200.00,
+      "lead_time_days": 2,
+      "unit_price": 55.00,
+      "shipping_cost": 140.00,
       "moq": 20,
       "reliability_score": 91.0,
-      "contact_email": "sales@docktech.com"
+      "contact_email": "sales@sensortech.com"
     },
     {
       "supplier_id": "SUP-AEROFREIGHT",
       "supplier_name": "AeroFreight Priority (Expedited)",
       "sku": "SKU-104",
       "strategy_type": "Beta",
-      "lead_time_days": 3,
-      "unit_price": 78.00,
-      "shipping_cost": 420.00,
+      "lead_time_days": 1,
+      "unit_price": 72.00,
+      "shipping_cost": 260.00,
       "moq": 10,
       "reliability_score": 99.5,
       "contact_email": "ops@aerofreight.com"
     }
   ],
   "daily_sales_logs": [
-    {"sku": "SKU-101", "history": [10, 11, 9, 10, 12, 8, 10, 11, 9, 10, 10, 12, 8, 10, 11, 9, 10, 12, 8, 10, 11, 9, 10, 10, 12, 8, 10, 11, 9, 10]},
-    {"sku": "SKU-102", "history": [12, 10, 8, 11, 9, 10, 10, 12, 9, 8, 11, 10, 9, 10, 12, 8, 11, 10, 9, 10, 11, 8, 12, 10, 9, 10, 11, 8, 12, 10]},
-    {"sku": "SKU-103", "history": [8, 9, 7, 8, 8, 9, 7, 8, 8, 9, 7, 8, 8, 9, 7, 8, 8, 9, 7, 8, 8, 9, 7, 8, 8, 9, 7, 8, 8, 9]},
-    {"sku": "SKU-104", "history": [5, 4, 6, 5, 5, 4, 6, 5, 5, 4, 6, 5, 5, 4, 6, 5, 5, 4, 6, 5, 5, 4, 6, 5, 5, 4, 6, 5, 5, 4]}
+    {
+      "sku": "SKU-101",
+      "history": [10, 11, 9, 10, 12, 8, 10, 11, 9, 10, 10, 12, 8, 10, 11, 9, 10, 12, 8, 10, 11, 9, 10, 10, 12, 8, 10, 11, 9, 10]
+    },
+    {
+      "sku": "SKU-102",
+      "history": [10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10]
+    },
+    {
+      "sku": "SKU-103",
+      "history": [6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6]
+    },
+    {
+      "sku": "SKU-104",
+      "history": [25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25]
+    }
   ]
 }

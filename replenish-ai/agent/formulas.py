@@ -66,20 +66,20 @@ def calculate_roq(
     return round(base_coverage_units + deficit_compensation, 2)
 
 
-def triage_risk(dos: float, lead_time_days: int, safety_stock_days: int) -> str:
+def triage_risk(dos: float, lead_time_days: int, safety_stock_days: int = 3) -> str:
     """
     Core Rule 5:
     Risk Triage:
     - CRITICAL: Days of Supply < Supplier Lead Time (Stockout inevitable before delivery).
-    - HIGH: Days of Supply <= Supplier Lead Time + Safety Stock Days.
-    - SAFE: Days of Supply > Supplier Lead Time + Safety Stock Days.
+    - AT RISK: Days of Supply <= Supplier Lead Time + buffer days (e.g., 3 days buffer).
+    - HEALTHY: Days of Supply > Supplier Lead Time + buffer days.
     """
     if dos < lead_time_days:
         return "CRITICAL"
     elif dos <= (lead_time_days + safety_stock_days):
-        return "HIGH"
+        return "AT RISK"
     else:
-        return "SAFE"
+        return "HEALTHY"
 
 
 def compute_all_reorder_metrics(

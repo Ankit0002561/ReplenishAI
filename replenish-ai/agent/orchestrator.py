@@ -5,10 +5,12 @@ mathematical replenishment calculations, and procurement order formulation.
 """
 
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import datetime, timedelta
+import secrets
 from typing import Dict, List, Any, Optional
 from agent.tools import inventory_lookup, sales_history_analysis, supplier_comparison, reorder_calculation
-from agent.formulas import evaluate_supplier_strategy, compute_all_reorder_metrics
+from agent.formulas import evaluate_supplier_strategy, compute_all_reorder_metrics, calculate_dos, triage_risk
+from data.database import get_all_products, get_suppliers_for_sku
 
 
 @dataclass
@@ -40,6 +42,39 @@ class AuditReport:
     strategy_beta_analysis: Dict[str, Any]
     tradeoff_summary: Dict[str, Any]
     final_recommendation: Dict[str, Any]
+    po_payload: Dict[str, Any] = field(default_factory=dict)
+
+
+def get_fleet_overview(buffer_days: int = 3, db_path: Optional[Any] = None) -> List[Dict[str, Any]]:
+    """
+    Computes top-level fleet overview for all SKUs:
+    SKU | Product Name | On-Hand Stock | Daily Demand | Days of Supply | Risk Status
+    """
+    products = get_all_products(db_path)
+    overview = []
+    for p in products:
+        sku = p["sku"]
+        stock = float(p["available_stock"])
+        sales_data = sales_history_analysis(sku, window_days=30)
+        add = sales_data.get("add", 0.0)
+        suppliers = get_suppliers_for_sku(sku, db_path)
+        alpha = next((s for s in suppliers if s["strategy_type"] == "Alpha"), None)
+        std_lead = alpha["lead_time_days"] if alpha else 5
+
+        dos = calculate_dos(stock, add)
+        risk = triage_risk(dos, std_lead, safety_stock_days=buffer_days)
+
+        overview.append({
+            "sku": sku,
+            "product_name": p["name"],
+            "category": p["category"],
+            "on_hand_stock": stock,
+            "daily_demand": add,
+            "days_of_supply": dos,
+            "standard_lead_time": std_lead,
+            "risk_status": risk
+        })
+    return overview
 
 
 class ReplenishAIAgent:
@@ -57,8 +92,8 @@ CORE RULES & FORMULAS:
 4. Recommended Order Quantity (ROQ) = (ADD * (Target Coverage Days + Safety Stock Days)) + max(0, -Stockout Gap)
 5. Risk Triage:
    - CRITICAL: Days of Supply < Supplier Lead Time (Stockout inevitable before delivery).
-   - HIGH: Days of Supply <= Supplier Lead Time + Safety Stock Days.
-   - SAFE: Days of Supply > Supplier Lead Time + Safety Stock Days.
+   - AT RISK: Days of Supply <= Supplier Lead Time + Safety Stock / Buffer Days.
+   - HEALTHY: Days of Supply > Supplier Lead Time + Safety Stock / Buffer Days.
 6. Always evaluate two trade-off strategies:
    - Strategy Alpha: Cost-Optimized (standard lead time, lowest landed cost).
    - Strategy Beta: Lead-Time Optimized / Expedited (fastest delivery to prevent stockout).
@@ -162,7 +197,7 @@ CORE RULES & FORMULAS:
         thought_4 = (
             "Executing deterministic replenishment formulas for both vendor options. "
             "Calculating Days of Supply (DoS), Lead Time Demand (LTD), Stockout Gap, "
-            "Risk Triage (CRITICAL/HIGH/SAFE), and Recommended Order Quantity (ROQ)."
+            "Risk Triage (CRITICAL/AT RISK/HEALTHY), and Recommended Order Quantity (ROQ)."
         )
 
         # Standard Alpha metrics
@@ -181,6 +216,7 @@ CORE RULES & FORMULAS:
             moq=alpha_sup["moq"],
             strategy_type="Alpha (Cost-Optimized Standard)"
         )
+        alpha_eval["supplier_id"] = alpha_sup["supplier_id"]
         alpha_eval["supplier_name"] = alpha_sup["supplier_name"]
         alpha_eval["contact_email"] = alpha_sup["contact_email"]
 
@@ -200,6 +236,7 @@ CORE RULES & FORMULAS:
             moq=beta_sup["moq"],
             strategy_type="Beta (Lead-Time Expedited)"
         )
+        beta_eval["supplier_id"] = beta_sup["supplier_id"]
         beta_eval["supplier_name"] = beta_sup["supplier_name"]
         beta_eval["contact_email"] = beta_sup["contact_email"]
 
@@ -271,6 +308,7 @@ CORE RULES & FORMULAS:
         if overall_risk == "CRITICAL":
             if unfulfilled_diff > 0:
                 selected_strategy = "Strategy Beta (Expedited)"
+                contract_type = "EXPEDITED"
                 chosen_supplier = beta_sup
                 chosen_eval = beta_eval
                 order_qty = beta_eval["effective_order_qty"]
@@ -285,6 +323,7 @@ CORE RULES & FORMULAS:
                 )
             else:
                 selected_strategy = "Strategy Alpha (Cost-Optimized)"
+                contract_type = "STANDARD"
                 chosen_supplier = alpha_sup
                 chosen_eval = alpha_eval
                 order_qty = alpha_eval["effective_order_qty"]
@@ -292,37 +331,45 @@ CORE RULES & FORMULAS:
                     f"CRITICAL inventory alert, but expedited dispatch offers no deficit advantage. "
                     f"Strategy Alpha selected to minimize landed costs."
                 )
-        elif overall_risk == "HIGH":
+        elif overall_risk in ["AT RISK", "HIGH"]:
             selected_strategy = "Strategy Alpha (Cost-Optimized)"
+            contract_type = "STANDARD"
             chosen_supplier = alpha_sup
             chosen_eval = alpha_eval
             order_qty = alpha_eval["effective_order_qty"]
             recommendation_rationale = (
-                f"HIGH RISK: Current Days of Supply ({metrics_alpha.dos:.1f} days) is sufficient to cover standard lead time "
-                f"({alpha_sup['lead_time_days']} days), but cuts into the {self.safety_stock_days}-day safety buffer. "
-                f"Since no immediate stockout will occur during the 5-day delivery window (Stockout Gap: {metrics_alpha.stockout_gap:+.1f} units), "
+                f"AT RISK: Current Days of Supply ({metrics_alpha.dos:.1f} days) is sufficient to cover standard lead time "
+                f"({alpha_sup['lead_time_days']} days), but low buffer remains (threshold: {self.safety_stock_days} days). "
+                f"Since no immediate stockout will occur during the delivery window (Stockout Gap: {metrics_alpha.stockout_gap:+.1f} units), "
                 f"Strategy Alpha is optimal. It saves ${cost_diff:.2f} in landed costs while replenishing inventory before zero-stock is reached."
             )
-        else:  # SAFE
+        else:  # HEALTHY / SAFE
             selected_strategy = "Strategy Alpha (Cost-Optimized / Routine)"
+            contract_type = "STANDARD"
             chosen_supplier = alpha_sup
             chosen_eval = alpha_eval
             order_qty = alpha_eval["effective_order_qty"]
             recommendation_rationale = (
-                f"SAFE: Inventory levels ({available_stock:g} units, {metrics_alpha.dos:.1f} DoS) comfortably exceed lead time plus "
+                f"HEALTHY: Inventory levels ({available_stock:g} units, {metrics_alpha.dos:.1f} DoS) comfortably exceed lead time plus "
                 f"safety buffer ({alpha_sup['lead_time_days'] + self.safety_stock_days} days). No emergency reorder needed. "
                 f"For routine forward-looking replenishment, Strategy Alpha provides the lowest landed cost basis "
                 f"(${alpha_eval['effective_unit_cost']:.2f}/unit all-in)."
             )
 
-        po_number = f"PO-{clean_sku}-{datetime.now().strftime('%Y%m%d%H%M')}"
+        now_dt = datetime.now()
+        date_str = now_dt.strftime("%Y%m%d")
+        random4 = secrets.token_hex(2).upper()
+        po_number = f"PO-{date_str}-{clean_sku}-{random4}"
+        lead_days = int(chosen_supplier["lead_time_days"])
+        expected_arrival = (now_dt + timedelta(days=lead_days)).strftime("%Y-%m-%d")
+
         final_recommendation = {
             "po_number": po_number,
             "selected_strategy": selected_strategy,
             "supplier_id": chosen_supplier["supplier_id"],
             "supplier_name": chosen_supplier["supplier_name"],
             "supplier_contact": chosen_supplier["contact_email"],
-            "lead_time_days": chosen_supplier["lead_time_days"],
+            "lead_time_days": lead_days,
             "unit_price": chosen_supplier["unit_price"],
             "order_quantity": order_qty,
             "subtotal": round(order_qty * chosen_supplier["unit_price"], 2),
@@ -330,6 +377,32 @@ CORE RULES & FORMULAS:
             "total_landed_cost": chosen_eval["landed_cost"],
             "rationale": recommendation_rationale,
             "status": "APPROVED_FOR_DISPATCH"
+        }
+
+        # Structured schema adhering strictly to Feature 2 One-Click PO Export specification
+        po_payload = {
+            "purchase_order": {
+                "po_number": po_number,
+                "created_at": now_dt.isoformat(),
+                "status": "APPROVED_DRAFT",
+                "item_details": {
+                    "sku": clean_sku,
+                    "product_name": product_name,
+                    "units_ordered": int(round(order_qty))
+                },
+                "vendor_details": {
+                    "vendor_id": chosen_supplier["supplier_id"],
+                    "vendor_name": chosen_supplier["supplier_name"],
+                    "contract_type": contract_type,
+                    "unit_price_usd": float(chosen_supplier["unit_price"]),
+                    "shipping_fee_usd": float(chosen_supplier["shipping_cost"]),
+                    "total_landed_cost_usd": float(chosen_eval["landed_cost"]),
+                    "committed_lead_time_days": lead_days,
+                    "expected_arrival_date": expected_arrival
+                },
+                "procurement_rationale": recommendation_rationale,
+                "authorizing_agent": "ReplenishAI Autonomous Agent v1.0"
+            }
         }
 
         deduction_5 = (
@@ -351,7 +424,7 @@ CORE RULES & FORMULAS:
             sku=clean_sku,
             product_name=product_name,
             category=category,
-            run_timestamp=datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+            run_timestamp=now_dt.strftime("%Y-%m-%d %H:%M:%S"),
             target_coverage_days=self.target_coverage_days,
             safety_stock_days=self.safety_stock_days,
             traces=traces,
@@ -362,5 +435,6 @@ CORE RULES & FORMULAS:
             strategy_alpha_analysis=alpha_eval,
             strategy_beta_analysis=beta_eval,
             tradeoff_summary=tradeoff_summary,
-            final_recommendation=final_recommendation
+            final_recommendation=final_recommendation,
+            po_payload=po_payload
         )
